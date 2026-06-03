@@ -2,11 +2,11 @@
 
 ## Overview
 
-This project implements a simplified Graph Neural Network (GNN) framework for predicting missing edges in a network that can reduce the **maximum betweenness centrality** of the graph.
+This project implements a simplified Graph Neural Network (GNN) framework for predicting missing edges in a network that can reduce the maximum betweenness centrality of the graph.
 
 The model is inspired by the research paper:
 
-**“Deep Learning based Link Prediction for Minimizing Maximum Betweenness”**
+**"Deep Learning based Link Prediction for Minimizing Maximum Betweenness"**
 
 The implementation uses:
 
@@ -23,21 +23,21 @@ This version does not require PyTorch Geometric.
 
 Given a graph:
 
-[
+$$
 G = (V,E)
-]
+$$
 
 Find a missing edge:
 
-[
+$$
 e \notin E
-]
+$$
 
-such that adding the edge minimizes the graph’s:
+such that adding the edge minimizes:
 
-[
-\max_{v \in V} BC(v)
-]
+$$
+\max BC(v)
+$$
 
 where:
 
@@ -56,23 +56,32 @@ Learns node embeddings using neighborhood aggregation.
 
 ### Aggregation
 
-[
-h_{N(v)}^{(k)} =
+$$
+h_{N(v)}^{k} =
 \frac{1}{|N(v)|}
-\sum_{u \in N(v)}
-h_u^{(k-1)}
-]
+\sum h_u^{(k-1)}
+$$
+
+where:
+
+* (N(v)) = neighbors of node (v)
+* (h_u^{(k-1)}) = embedding of neighbor (u) from previous layer
 
 ### Update Rule
 
-[
-h_v^{(k)} =
+$$
+h_v^{k} =
 \sigma(
 W_1 h_v^{(k-1)}
 +
-W_2 h_{N(v)}^{(k)}
+W_2 h_{N(v)}^{k}
 )
-]
+$$
+
+where:
+
+* (W_1, W_2) are learnable weight matrices
+* (\sigma) is the activation function
 
 ---
 
@@ -105,27 +114,70 @@ Uses:
 
 ---
 
-# Triplet Margin Loss
+# Edge Embedding
+
+For an edge ((u,v)):
+
+$$
+E_{uv} = CONCAT(h_u,h_v)
+$$
+
+The embeddings of both nodes are concatenated to represent the edge.
+
+---
+
+# Classification Loss
+
+Binary Cross Entropy Loss:
+
+$$
+Loss_C =
+-[y\log(\hat{y})
++
+(1-y)\log(1-\hat{y})]
+$$
+
+where:
+
+* (y) = ground truth label
+* (\hat{y}) = predicted probability
+
+---
+
+# Triplet Margin Ranking Loss
 
 For three edges:
 
-[
+$$
 (m,n,o)
-]
+$$
 
-the loss is:
+the ranking loss is:
 
-[
-Loss =
+$$
+Loss_R =
 \max(0,-(s_m-s_n)+M)
-]
+$$
 
 where:
 
 * (s_m,s_n,s_o) are predicted ranking scores
-* (M) is margin
+* (M) is the margin
 
 This helps the model learn relative ordering between edges.
+
+---
+
+# Final Loss
+
+$$
+Total\ Loss = Loss_C + Loss_R
+$$
+
+The model jointly learns:
+
+* edge classification
+* edge ranking
 
 ---
 
@@ -142,7 +194,7 @@ This helps the model learn relative ordering between edges.
 
 # Project Structure
 
-```bash
+```bash id="z5qzj0"
 project/
 │
 ├── model.py
@@ -157,7 +209,7 @@ project/
 
 Install dependencies:
 
-```bash
+```bash id="x5s0kr"
 pip install torch
 ```
 
@@ -167,7 +219,7 @@ pip install torch
 
 Run training:
 
-```bash
+```bash id="6ps2ys"
 python train.py
 ```
 
@@ -243,16 +295,14 @@ The original paper evaluates performance using:
 
 # References
 
-1. GraphSAGE:
+1. GraphSAGE
    Hamilton et al., NIPS 2017
 
-2. Betweenness Centrality:
+2. Betweenness Centrality
    Freeman, 1977
 
-3. GNN Centrality Estimation:
+3. GNN Centrality Estimation
    Maurya et al., TKDD 2021
 
-4. Brandes Algorithm:
+4. Brandes Algorithm
    Brandes, 2001
-
----
