@@ -293,7 +293,7 @@ The original paper evaluates performance using:
 
 ---
 
-# References
+# Reference's
 
 1. GraphSAGE
    Hamilton et al., NIPS 2017
